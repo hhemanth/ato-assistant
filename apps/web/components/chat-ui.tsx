@@ -10,7 +10,7 @@ import {
 } from "./chat";
 import type { Message } from "./chat";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
+const API_URL = "/api";
 
 export default function ChatUI() {
   const [messages, setMessages] = useState<Message[]>([]);
