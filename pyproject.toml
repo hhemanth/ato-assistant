@@ -1,0 +1,10 @@
+[project]
+name = "ato-assistant"
+version = "0.1.0"
+description = "ATO Assistant — trustworthy AI for Australian tax information"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = []
+
+[tool.uv.workspace]
+members = ["apps/api"]

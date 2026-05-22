@@ -13,5 +13,11 @@ apps/web/.env.local
 # OS
 .DS_Store
 
+# IDE
+.idea/
+
+# TypeScript build info
+*.tsbuildinfo
+
 # Brainstorming companion
 .superpowers/
