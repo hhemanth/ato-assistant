@@ -19,9 +19,23 @@ SUPABASE_KEY: str = os.environ["SUPABASE_KEY"]
 
 USER_AGENT = (
     "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
-    "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36 "
-    "(ATO Assistant research tool; contact: hhemanth@gmail.com)"
+    "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
 )
+
+BROWSER_HEADERS = {
+    "User-Agent": USER_AGENT,
+    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
+    "Accept-Language": "en-AU,en;q=0.9",
+    "Accept-Encoding": "gzip, deflate",
+    "Connection": "keep-alive",
+    "Upgrade-Insecure-Requests": "1",
+    "Sec-Fetch-Dest": "document",
+    "Sec-Fetch-Mode": "navigate",
+    "Sec-Fetch-Site": "none",
+    "Sec-Fetch-User": "?1",
+    # RFC 7231 From header — identifies the bot operator
+    "From": "hhemanth@gmail.com",
+}
 
 URLS_FILE = Path(__file__).parent / "target_urls.txt"
 MIN_CONTENT_CHARS = 200  # pages below this are hub/nav pages — skip
@@ -70,7 +84,7 @@ async def scrape_url(
     last_modified = _extract_last_modified(resp.headers)
 
     if len(markdown) < MIN_CONTENT_CHARS:
-        print(f"  THIN  {final_url}: {len(markdown)} chars — hub page, skipping")
+        print(f"  THIN  {final_url}: {len(markdown)} chars (raw HTML: {len(resp.text)} bytes) — skipping")
         return
 
     supabase.table("ato_pages").upsert(
@@ -98,9 +112,8 @@ async def main() -> None:
     print(f"Scraping {len(urls)} URLs at 1 req/sec ...\n")
 
     supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
-    headers = {"User-Agent": USER_AGENT}
 
-    async with httpx.AsyncClient(headers=headers, timeout=30) as client:
+    async with httpx.AsyncClient(headers=BROWSER_HEADERS, timeout=30) as client:
         for i, url in enumerate(urls, 1):
             print(f"[{i:02d}/{len(urls)}]", end=" ")
             await scrape_url(client, supabase, url)

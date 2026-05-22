@@ -8,6 +8,8 @@ dependencies = [
     "uvicorn[standard]>=0.32.0",
     "pydantic>=2.9.0",
     "python-dotenv>=1.0.0",
+    "voyageai>=0.3.0",
+    "supabase>=2.7.0",
 ]
 
 [build-system]

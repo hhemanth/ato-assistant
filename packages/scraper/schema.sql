@@ -30,10 +30,9 @@ create table ato_chunks (
   created_at    timestamptz default now()
 );
 
--- IVFFlat index for approximate nearest-neighbour search
--- lists=50 is appropriate for up to ~5000 chunks; re-tune if corpus grows significantly
-create index on ato_chunks using ivfflat (embedding vector_cosine_ops)
-  with (lists = 50);
+-- NOTE: Add an IVFFlat index once the corpus exceeds ~10k chunks.
+-- Below that threshold a sequential scan is faster than approximate search.
+-- When ready: CREATE INDEX ON ato_chunks USING ivfflat (embedding vector_cosine_ops) WITH (lists = 100);
 
 -- Helper: retrieve top-k chunks with citation fields in one query (no JOIN required)
 -- Usage: select * from search_chunks($1::vector, 5);

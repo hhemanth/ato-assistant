@@ -56,7 +56,8 @@ def main() -> None:
     for i in range(0, len(chunks), BATCH_SIZE):
         batch = chunks[i : i + BATCH_SIZE]
         rows = embed_batch(voyage, batch)
-        supabase.table("ato_chunks").upsert(rows).execute()
+        for row in rows:
+            supabase.table("ato_chunks").update({"embedding": row["embedding"]}).eq("id", row["id"]).execute()
         total += len(rows)
         print(f"  Batch {i // BATCH_SIZE + 1}: {len(rows)} chunks embedded (total: {total})")
 
