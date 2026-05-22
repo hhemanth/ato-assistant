@@ -8,12 +8,15 @@ from pathlib import Path
 
 import anthropic
 import voyageai
-from fastapi import APIRouter
+from fastapi import APIRouter, Request
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
+from slowapi import Limiter
+from slowapi.util import get_remote_address
 from supabase import create_client, Client
 
 router = APIRouter()
+limiter = Limiter(key_func=get_remote_address)
 
 _anthropic = anthropic.AsyncAnthropic(api_key=os.environ["ANTHROPIC_API_KEY"])
 _voyage = voyageai.Client(api_key=os.environ["VOYAGE_API_KEY"])
@@ -81,8 +84,9 @@ async def _stream_response(messages: list[Message]) -> AsyncIterator[str]:
 
 
 @router.post("/chat")
-async def chat(request: ChatRequest) -> StreamingResponse:
+@limiter.limit("10/minute")
+async def chat(request: Request, body: ChatRequest) -> StreamingResponse:
     return StreamingResponse(
-        _stream_response(request.messages),
+        _stream_response(body.messages),
         media_type="text/plain",
     )

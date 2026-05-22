@@ -1,14 +1,35 @@
+"use client";
+
+import { useState } from "react";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+
 interface AssistantRowProps {
   content: string;
-  citations?: string[];
+  query: string;
   isStreaming?: boolean;
 }
 
 export default function AssistantRow({
   content,
-  citations,
+  query,
   isStreaming = false,
 }: AssistantRowProps) {
+  const [reported, setReported] = useState(false);
+
+  async function handleReport() {
+    if (reported) return;
+    try {
+      await fetch("/api/feedback", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ user_query: query, response: content }),
+      });
+    } finally {
+      setReported(true);
+    }
+  }
+
   return (
     <div className="bg-white border-b border-chat-border px-6 py-4 flex gap-3 items-start">
       <span className="bg-navy text-gold text-[10px] font-semibold uppercase tracking-wide px-2 py-0.5 rounded flex-shrink-0 mt-0.5">
@@ -16,30 +37,38 @@ export default function AssistantRow({
       </span>
       <div className="flex-1 min-w-0">
         <div className="border-l-4 border-navy pl-3">
-          <p className="text-sm text-gray-900 leading-relaxed whitespace-pre-wrap">
-            {content}
+          <div className="text-sm text-gray-900 leading-relaxed prose prose-sm max-w-none
+            prose-headings:font-semibold prose-headings:text-navy prose-headings:mt-4 prose-headings:mb-1
+            prose-h2:text-base prose-h3:text-sm
+            prose-p:my-1.5
+            prose-a:text-navy prose-a:underline hover:prose-a:text-navy-mid
+            prose-strong:text-gray-900
+            prose-blockquote:border-l-2 prose-blockquote:border-amber-400 prose-blockquote:pl-3 prose-blockquote:text-gray-600 prose-blockquote:not-italic
+            prose-table:text-xs prose-table:w-full
+            prose-th:bg-gray-50 prose-th:px-3 prose-th:py-2 prose-th:text-left prose-th:font-semibold prose-th:border prose-th:border-gray-200
+            prose-td:px-3 prose-td:py-2 prose-td:border prose-td:border-gray-200
+            prose-ul:my-1.5 prose-li:my-0.5
+            prose-code:bg-gray-100 prose-code:px-1 prose-code:rounded prose-code:text-xs">
+            <ReactMarkdown remarkPlugins={[remarkGfm]}>
+              {content}
+            </ReactMarkdown>
             {isStreaming && (
               <span className="inline-block w-1.5 h-4 ml-0.5 bg-navy animate-pulse align-middle" />
             )}
-          </p>
-          {citations && citations.length > 0 && (
-            <footer className="mt-3 pt-3 border-t border-chat-border">
-              {citations.map((url, i) => (
-                <p key={i} className="text-xs text-[#6b7fa3]">
-                  [{i + 1}]{" "}
-                  <a
-                    href={url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="hover:underline"
-                  >
-                    {url}
-                  </a>
-                </p>
-              ))}
-            </footer>
-          )}
+          </div>
         </div>
+
+        {!isStreaming && content && (
+          <div className="mt-2 pl-3">
+            <button
+              onClick={handleReport}
+              disabled={reported}
+              className="text-xs text-gray-400 hover:text-red-500 disabled:text-gray-300 disabled:cursor-default transition-colors"
+            >
+              {reported ? "✓ Reported" : "Report incorrect answer"}
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

@@ -23,6 +23,14 @@ export default function ChatUI() {
     setInput("");
   }
 
+  function setLastAssistantContent(content: string) {
+    setMessages((prev) => {
+      const updated = [...prev];
+      updated[updated.length - 1] = { role: "assistant", content };
+      return updated;
+    });
+  }
+
   async function sendMessage() {
     const text = input.trim();
     if (!text || streaming) return;
@@ -40,7 +48,16 @@ export default function ChatUI() {
         body: JSON.stringify({ messages: nextMessages }),
       });
 
-      if (!res.ok || !res.body) throw new Error(`API error: ${res.status}`);
+      if (!res.ok) {
+        const errorText = await res.text();
+        setLastAssistantContent(errorText || "Something went wrong. Please try again.");
+        return;
+      }
+
+      if (!res.body) {
+        setLastAssistantContent("No response received. Please try again.");
+        return;
+      }
 
       const reader = res.body.getReader();
       const decoder = new TextDecoder();
@@ -59,14 +76,7 @@ export default function ChatUI() {
         });
       }
     } catch {
-      setMessages((prev) => {
-        const updated = [...prev];
-        updated[updated.length - 1] = {
-          role: "assistant",
-          content: "Sorry, something went wrong. Please try again.",
-        };
-        return updated;
-      });
+      setLastAssistantContent("Unable to reach the service. Check your connection and try again.");
     } finally {
       setStreaming(false);
     }

@@ -17,17 +17,21 @@ export default function MessageList({ messages, streaming }: MessageListProps) {
 
   return (
     <div className="flex-1 overflow-y-auto">
-      {messages.map((msg, i) =>
-        msg.role === "user" ? (
-          <UserRow key={i} content={msg.content} />
-        ) : (
+      {messages.map((msg, i) => {
+        if (msg.role === "user") {
+          return <UserRow key={i} content={msg.content} />;
+        }
+        const precedingQuery =
+          messages.slice(0, i).findLast((m) => m.role === "user")?.content ?? "";
+        return (
           <AssistantRow
             key={i}
             content={msg.content}
+            query={precedingQuery}
             isStreaming={streaming && i === messages.length - 1}
           />
-        )
-      )}
+        );
+      })}
       <div ref={bottomRef} />
     </div>
   );

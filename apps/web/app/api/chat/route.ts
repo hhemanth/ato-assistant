@@ -1,33 +1,30 @@
-import Anthropic from "@anthropic-ai/sdk";
 import { NextRequest } from "next/server";
 
-const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+const BACKEND = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 
 export async function POST(req: NextRequest) {
-  const { messages } = await req.json();
+  const body = await req.json();
 
-  const stream = await client.messages.stream({
-    model: "claude-sonnet-4-6",
-    max_tokens: 1024,
-    messages,
-  });
+  let res: Response;
+  try {
+    res = await fetch(`${BACKEND}/chat`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+  } catch {
+    return new Response("Service unavailable. Please try again.", { status: 503 });
+  }
 
-  const encoder = new TextEncoder();
-  const readable = new ReadableStream({
-    async start(controller) {
-      for await (const chunk of stream) {
-        if (
-          chunk.type === "content_block_delta" &&
-          chunk.delta.type === "text_delta"
-        ) {
-          controller.enqueue(encoder.encode(chunk.delta.text));
-        }
-      }
-      controller.close();
-    },
-  });
+  if (!res.ok) {
+    const message =
+      res.status === 429
+        ? "You're sending messages too quickly. Please wait a moment and try again."
+        : "Something went wrong. Please try again.";
+    return new Response(message, { status: res.status });
+  }
 
-  return new Response(readable, {
+  return new Response(res.body, {
     headers: { "Content-Type": "text/plain; charset=utf-8" },
   });
 }
