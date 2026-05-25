@@ -10,6 +10,8 @@ import anthropic
 import voyageai
 from fastapi import APIRouter, Request
 from fastapi.responses import StreamingResponse
+from langsmith import traceable
+from langsmith.wrappers import wrap_anthropic
 from pydantic import BaseModel
 from slowapi import Limiter
 from slowapi.util import get_remote_address
@@ -18,7 +20,7 @@ from supabase import create_client, Client
 router = APIRouter()
 limiter = Limiter(key_func=get_remote_address)
 
-_anthropic = anthropic.AsyncAnthropic(api_key=os.environ["ANTHROPIC_API_KEY"])
+_anthropic = wrap_anthropic(anthropic.AsyncAnthropic(api_key=os.environ["ANTHROPIC_API_KEY"]))
 _voyage = voyageai.Client(api_key=os.environ["VOYAGE_API_KEY"])
 _supabase: Client = create_client(os.environ["SUPABASE_URL"], os.environ["SUPABASE_KEY"])
 
@@ -54,6 +56,7 @@ def _format_context(chunks: list[dict]) -> str:
     return "\n\n---\n\n".join(parts)
 
 
+@traceable(name="retrieve", metadata={"embed_model": _EMBED_MODEL})
 async def _retrieve(query: str) -> list[dict]:
     embed_result = await asyncio.to_thread(
         lambda: _voyage.embed([query], model=_EMBED_MODEL, input_type="query")
@@ -68,6 +71,7 @@ async def _retrieve(query: str) -> list[dict]:
     return response.data or []
 
 
+@traceable(name="generate", metadata={"model": _MODEL})
 async def _stream_response(messages: list[Message]) -> AsyncIterator[str]:
     query = next((m.content for m in reversed(messages) if m.role == "user"), "")
     chunks = await _retrieve(query)
