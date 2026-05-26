@@ -11,6 +11,9 @@ dependencies = [
     "langsmith>=0.2.0",
 ]
 
+[tool.setuptools]
+py-modules = ["graph", "judge_graph", "state"]
+
 [tool.setuptools.packages.find]
 where = ["."]
 include = ["nodes*", "prompts*"]
