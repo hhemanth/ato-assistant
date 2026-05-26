@@ -16,7 +16,7 @@ py-modules = ["graph", "judge_graph", "state"]
 
 [tool.setuptools.packages.find]
 where = ["."]
-include = ["nodes*", "prompts*"]
+include = ["nodes*", "prompts*", "tools*"]
 
 [tool.uv]
 package = true

@@ -39,14 +39,47 @@ _SYSTEM_PROMPT   = (_PROMPTS / "system.md").read_text()
 _REFUSAL_PROMPT  = (_PROMPTS / "refusal.md").read_text()
 _REDIRECT_PROMPT = (_PROMPTS / "out_of_scope.md").read_text()
 
-_CALC_PLACEHOLDER = (
-    "The tax calculator is coming soon. "
-    "For now, the ATO has a free income tax estimator at "
-    "https://www.ato.gov.au/calculators-and-tools/income-tax-estimator — "
-    "it covers income tax, Medicare levy, and most offsets."
-)
-
 JUDGE_THRESHOLD = 0.6
+
+
+def _format_calculator_response(result: dict, query: str) -> str:
+    if "error" in result:
+        return result["error"]
+    fy = result["financial_year"]
+    income = result["gross_income"]
+    rows = [
+        ("Income tax (gross)", result["income_tax"] + result["lito"]),
+        ("Low Income Tax Offset (LITO)", -result["lito"]),
+        ("Net income tax", result["income_tax"]),
+        ("Medicare levy", result["medicare_levy"]),
+    ]
+    if result["medicare_levy_surcharge"]:
+        rows.append(("Medicare Levy Surcharge", result["medicare_levy_surcharge"]))
+    if result["help_repayment"]:
+        rows.append(("HELP/HECS repayment", result["help_repayment"]))
+
+    table = "| Component | Amount |\n|-----------|--------|\n"
+    for label, amount in rows:
+        prefix = "−" if amount < 0 else ""
+        table += f"| {label} | {prefix}${abs(amount):,.2f} |\n"
+    table += f"| **Total tax** | **${result['total_tax']:,.2f}** |\n"
+    table += f"| **Net income** | **${result['net_income']:,.2f}** |\n"
+    table += f"| **Effective rate** | **{result['effective_rate']:.1f}%** |\n"
+
+    sources = (
+        "\n**Sources:** "
+        "[Tax rates](https://www.ato.gov.au/tax-rates-and-codes/tax-rates-australian-residents) · "
+        "[LITO](https://www.ato.gov.au/individuals-and-families/income-deductions-offsets-and-records/tax-offsets/low-income-tax-offset) · "
+        "[Medicare levy](https://www.ato.gov.au/individuals-and-families/medicare-and-private-health-insurance/medicare-levy)"
+    )
+    disclaimer = "\n\n*This is a general estimate. For personalised advice, consult a [registered tax agent](https://www.tpb.gov.au/find-a-registered-tax-practitioner).*"
+
+    return (
+        f"## Tax estimate — ${income:,.0f} income ({fy})\n\n"
+        f"{table}"
+        f"{sources}"
+        f"{disclaimer}"
+    )
 
 
 class Message(BaseModel):
@@ -143,10 +176,12 @@ async def _stream_response(messages: list[Message]) -> AsyncIterator[str]:
         source = _refusal_stream(query)
     elif category == "out_of_scope":
         source = _redirect_stream(query)
-    else:  # calculation — placeholder until Day 12
-        async def _placeholder() -> AsyncIterator[str]:
-            yield _CALC_PLACEHOLDER
-        source = _placeholder()
+    else:  # calculation
+        calc_result = route_state.get("calculator_result", {})
+        formatted = _format_calculator_response(calc_result, query)
+        async def _calc_stream() -> AsyncIterator[str]:
+            yield formatted
+        source = _calc_stream()
 
     # Stream to client, buffer for judge
     buffer: list[str] = []
