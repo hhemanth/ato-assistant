@@ -1,7 +1,12 @@
 const SUGGESTIONS = [
   "How do I claim work-from-home deductions?",
-  "What is the Medicare levy?",
-  "When is the tax return deadline?",
+  "What is the Medicare levy surcharge?",
+  "How does the CGT discount work for assets held over 12 months?",
+  "Do I need to register for GST as a sole trader?",
+  "How are crypto assets taxed in Australia?",
+  "What can rideshare drivers claim as deductions?",
+  "How does salary sacrificing into super reduce my tax?",
+  "What is the HELP repayment threshold for 2024-25?",
 ];
 
 interface EmptyStateProps {

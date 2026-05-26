@@ -12,33 +12,29 @@
 
 ### Mon (Day 8) — Expand the corpus + retrieval quality (4 hrs)
 
-- [ ] Audit the 30-50 page corpus from Week 1: which questions failed? Which topics weren't covered?
-- [ ] Expand to **~150 pages** (still not 300+) — add: super basics for individuals, BAS intro, capital gains intro, non-resident rates, working holiday rates, common deductions in detail
-- [ ] Re-run scrape → chunk → embed
-- [ ] **Add hybrid retrieval:** Postgres `tsvector` full-text search combined with vector similarity. Why: ATO pages have very specific terminology that BM25 catches better than embeddings.
-- [ ] Re-test the 10 questions from last week — should see noticeable improvement
+- [x] Audit the 30-50 page corpus from Week 1: which questions failed? Which topics weren't covered?
+- [x] Expand to **~275 pages** — spider from 24 hub pages, leaf-only filter, scraped 209 net-new pages (total ~275 indexed)
+- [x] Re-run scrape → chunk → embed
+- [x] **Add hybrid retrieval:** Postgres `tsvector` full-text search combined with vector similarity.
 
-**Deliverable:** ~150 ATO pages indexed, hybrid retrieval working, measurably better answers on the test set.
+**Deliverable:** ~275 ATO pages indexed, hybrid retrieval working.
 
 ### Tue (Day 9) — Error handling, streaming, rate limiting (4 hrs)
 
-- [ ] Add streaming responses end-to-end (FastAPI → Vercel AI SDK → UI)
-- [ ] Proper error states in UI: rate limit hit, retrieval failure, LLM error
-- [ ] Rate limiting on the API: 10 requests/min per IP using Upstash Redis (free tier)
-- [ ] Add a "Report incorrect answer" button — writes to a Supabase table `feedback` for review
-- [ ] Langfuse dashboard: create custom views for slice 2 metrics
-  - Latency p50/p95 per query
-  - Citations per response (average)
-  - Most common queries (for week 3 eval inspiration)
+- [x] Add streaming responses end-to-end (FastAPI → Vercel AI SDK → UI)
+- [x] Proper error states in UI: rate limit hit, retrieval failure, LLM error
+- [x] Rate limiting on the API: 10 requests/min per IP using slowapi
+- [x] Add a "Report incorrect answer" button — writes to a Supabase table `feedback` for review
+- [ ] Langfuse dashboard: create custom views for slice 2 metrics (deferred)
 
 **Deliverable:** Live URL is robust to errors, streams smoothly, rate-limited.
 
 ### Wed (Day 10) — Polish slice 2 demo + content prep (4 hrs)
 
-- [ ] Add 6-8 "example queries" on the landing page to lower friction
-- [ ] Mobile responsive check
+- [x] Add 8 example queries on the landing page (WFH, Medicare, CGT, GST, crypto, rideshare, super, HELP)
+- [x] Mobile responsive check (safe-area, tap targets, responsive padding, table overflow)
 - [ ] Capture demo video showing citations expanding/contracting
-- [ ] **🚀 Slice 2 officially "shipped"** — this is article #2's launch state
+- [x] **🚀 Slice 2 officially "shipped"**
 
 **Deliverable:** Slice 2 product feels polished. Demo-ready for content.
 
