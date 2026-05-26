@@ -171,7 +171,7 @@ async def _stream_response(messages: list[Message]) -> AsyncIterator[str]:
                 "\n\n> Note: I may not have full ATO coverage on this topic — "
                 "check [ato.gov.au](https://ato.gov.au) directly."
             )
-        yield f"\n__JUDGE__{json.dumps(scores)}__"
+    yield f"\n__JUDGE__{json.dumps(scores)}__"
 
 
 @router.post("/chat")
