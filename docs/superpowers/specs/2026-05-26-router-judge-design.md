@@ -8,40 +8,58 @@
 
 ## Architecture Overview
 
+Two separate LangGraph graphs with clear responsibilities:
+
 ```
 POST /chat
   ↓
-graph.ainvoke({query, messages})
+Phase 1 — router_graph.ainvoke({query, messages})
   ↓
 router_node (Haiku 4.5, ~150ms)
   → {category, confidence, reasoning}
   ↓
-chat.py matches category:
+chat.py matches category, streams response, buffers tokens:
   "factual"         → _rag_stream()      (existing, unchanged)
   "personal_advice" → _refusal_stream()  (new)
   "out_of_scope"    → _redirect_stream() (new)
   "calculation"     → placeholder text   (Day 12 calculator slots in here)
   ↓
-tokens buffered as they stream to client
+Phase 2 — judge_graph.ainvoke({query, response}) [async, non-blocking]
   ↓
-after stream completes (async, non-blocking):
-  judge_node (Nemotron 4 340B via NVIDIA NIM)
-    input:  query + full buffered response
-    output: {helpfulness, correctness, coherence} scores (0.0–1.0)
-    → log all scores to LangSmith
-    → yield __JUDGE__{...}__ sentinel as final stream chunk
-    → if avg score < 0.6 → also yield low-confidence note before sentinel
+judge_node (Nemotron 4 340B via NVIDIA NIM)
+  → {helpfulness, correctness, coherence} scores (0.0–1.0)
+  → log all scores to LangSmith
+  → yield __JUDGE__{...}__ sentinel as final stream chunk
+  → if avg score < 0.6 → also yield low-confidence note before sentinel
 ```
+
+### Two Graphs
+
+| Graph | File | Nodes | Purpose |
+|-------|------|-------|---------|
+| `router_graph` | `graph.py` | `START → router → END` | Classify query |
+| `judge_graph` | `judge_graph.py` | `START → judge → END` | Score response |
+
+Both graphs share `AgentState` but only use the fields relevant to their phase.
 
 ---
 
 ## New Package: `packages/agent/`
 
+```
+packages/agent/
+  pyproject.toml   — depends on: langgraph, anthropic, openai, pydantic, langsmith
+  state.py         — AgentState TypedDict (shared by both graphs)
+  graph.py         — router graph: START → router → END
+  judge_graph.py   — judge graph:  START → judge  → END
+  nodes/
+    router.py      — Haiku 4.5 classification → RoutingDecision
+    judge.py       — Nemotron 4 340B reward scores via NVIDIA NIM
+  prompts/
+    router.md      — system + 2 few-shot examples × 4 categories
+```
+
 Added to the existing `uv` workspace (`pyproject.toml` `[tool.uv.workspace]` members).
-
-### `pyproject.toml`
-
-Dependencies: `langgraph`, `anthropic`, `openai`, `pydantic`, `python-dotenv`, `langsmith`
 
 `apps/api/pyproject.toml` must also add `ato-agent` as a workspace dependency so `chat.py` can import from `packages/agent`.
 
@@ -56,7 +74,7 @@ class AgentState(TypedDict):
     reasoning: str | None
 ```
 
-### `graph.py`
+### `graph.py` — router graph
 
 ```
 START → router_node → END
@@ -65,16 +83,31 @@ START → router_node → END
 Conditional edges for calculator (Day 12) and verifier (Day 14) slot in without touching router_node.
 
 ```python
-from langgraph.graph import StateGraph, START, END
-
-def build_graph() -> CompiledGraph:
+def build_router_graph() -> CompiledGraph:
     g = StateGraph(AgentState)
     g.add_node("router", router_node)
     g.add_edge(START, "router")
     g.add_edge("router", END)
     return g.compile()
 
-graph = build_graph()
+router_graph = build_router_graph()
+```
+
+### `judge_graph.py` — judge graph
+
+```
+START → judge_node → END
+```
+
+```python
+def build_judge_graph() -> CompiledGraph:
+    g = StateGraph(AgentState)
+    g.add_node("judge", judge_node)
+    g.add_edge(START, "judge")
+    g.add_edge("judge", END)
+    return g.compile()
+
+judge_graph = build_judge_graph()
 ```
 
 ### `nodes/router.py`
