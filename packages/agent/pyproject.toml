@@ -11,5 +11,9 @@ dependencies = [
     "langsmith>=0.2.0",
 ]
 
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["nodes*", "prompts*"]
+
 [tool.uv]
 package = true
