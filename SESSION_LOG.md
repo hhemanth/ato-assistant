@@ -50,3 +50,25 @@
 ### Notes
 - schema.sql intentionally kept without IVFFlat index (too small corpus; add when >10k chunks)
 - Dead URL to remove from target_urls.txt: `https://www.ato.gov.au/individuals-and-families/key-dates-for-individuals`
+
+---
+
+## 2026-05-26 — Slice 3, Day 11
+
+**Slice:** 3
+
+### What got done
+- packages/agent: new uv workspace member with LangGraph
+- router_graph: Haiku 4.5 classifies queries into factual/calculation/personal_advice/out_of_scope (20/20 test accuracy)
+- judge_graph: Nemotron 4 340B via NVIDIA NIM scores helpfulness/correctness/coherence (pending NVIDIA_API_KEY in .env)
+- chat.py: routes before streaming, judges after, yields __JUDGE__ sentinel
+- JudgePanel.tsx: collapsible quality scores UI rendered per response
+- refusal.md + out_of_scope.md prompts added
+- 20-query router test suite (100% accuracy)
+
+### What's blocked
+- judge smoke test: NVIDIA_API_KEY not yet added to .env or Railway
+
+### What's next
+- Add NVIDIA_API_KEY to .env (get free key at build.nvidia.com)
+- Day 12: Tax calculator (pure Python, 2024-25 brackets, Medicare levy, LITO, HELP)

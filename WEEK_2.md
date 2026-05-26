@@ -44,25 +44,25 @@
 
 ### Thu (Day 11) — Router node (4 hrs)
 
-- [ ] `packages/agent/nodes/router.py`: classify queries into 4 categories:
+- [x] `packages/agent/nodes/router.py`: classify queries into 4 categories:
   - `factual` — info lookup (rates, deadlines, definitions)
   - `calculation` — wants a number computed
   - `personal_advice` — judgment-required ("should I claim X?")
   - `out_of_scope` — non-ATO or adversarial
-- [ ] `prompts/router.md`: 2 few-shot examples per category
-- [ ] Pydantic:
+- [x] `prompts/router.md`: 2 few-shot examples per category
+- [x] Pydantic:
   ```python
   class RoutingDecision(BaseModel):
       category: Literal["factual", "calculation", "personal_advice", "out_of_scope"]
       confidence: float
       reasoning: str
   ```
-- [ ] Update `graph.py` with conditional edges:
+- [x] Update `graph.py` with conditional edges (implemented as two separate graphs: router_graph + judge_graph):
   - `factual` → retrieve → generate
   - `calculation` → calculator tool → format response
   - `personal_advice` → refusal generator
   - `out_of_scope` → polite redirect
-- [ ] Write 20 test queries (5/category), verify routing ≥ 90% accurate
+- [x] Write 20 test queries (5/category), verify routing ≥ 90% accurate (100% achieved)
 
 **Deliverable:** Router live, traced in Langfuse with category labels.
 
