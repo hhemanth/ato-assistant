@@ -67,8 +67,31 @@
 - 20-query router test suite (100% accuracy)
 
 ### What's blocked
-- judge smoke test: NVIDIA_API_KEY not yet added to .env or Railway
+- ~~judge smoke test: NVIDIA_API_KEY not yet added~~ — replaced Nemotron with Haiku 4.5 judge (no NVIDIA key needed)
 
 ### What's next
-- Add NVIDIA_API_KEY to .env (get free key at build.nvidia.com)
-- Day 12: Tax calculator (pure Python, 2024-25 brackets, Medicare levy, LITO, HELP)
+- Day 12: Tax calculator ✓ (done same session, see below)
+
+---
+
+## 2026-05-26 — Slice 3, Day 12
+
+**Slice:** 3
+
+### What got done
+- `packages/agent/tools/tax_calculator.py`: pure Python calculator, 2025-26 and 2026-27 only
+  - Income tax brackets (2026-27 has 15% second band vs 16% in 2025-26)
+  - Medicare levy with $26k shade-in threshold
+  - Medicare Levy Surcharge (3 tiers, singles: $101k/118k/158k)
+  - LITO (max $700, two-stage phase-out to $66,667)
+  - HELP marginal repayment (new 2025-26 system, threshold $67k)
+- 77/77 unit tests passing at every bracket boundary
+- `calculator_node.py`: Haiku 4.5 extracts income/year from natural language, calls calculator
+- `router_graph` updated: calculation → calculator_node → END (conditional edge)
+- `chat.py`: calculation queries now stream a formatted markdown table with ATO source links
+- Judge replaced: Nemotron deprecated, now using Haiku 4.5 LLM-as-judge (no NVIDIA key needed)
+- JudgePanel: expanded by default; report button made more prominent (red border)
+
+### What's next
+- Day 13: Refusal prompts polish + edge case testing (adversarial prompts, jailbreaks)
+- Day 14: Citation verifier scaffold

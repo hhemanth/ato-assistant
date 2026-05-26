@@ -68,15 +68,15 @@
 
 ### Fri (Day 12) — Tax calculator tool (4 hrs)
 
-- [ ] `packages/agent/tools/tax_calculator.py`: pure Python, no LLM. For 2024-25:
-  - Resident income tax brackets
-  - Medicare levy (2%) with low-income threshold
-  - Medicare Levy Surcharge (income-tested)
-  - Low Income Tax Offset (LITO)
-  - HELP/HECS repayment thresholds (current 18 bands)
-- [ ] Input/Output Pydantic models (see PLAN.md / original WEEK_2 for full schemas)
-- [ ] **Unit tests at every bracket boundary** — calculator correctness is non-negotiable
-- [ ] Wire as a LangGraph tool node, generator formats result with citations to source ATO pages
+- [x] `packages/agent/tools/tax_calculator.py`: pure Python, no LLM. 2025-26 and 2026-27:
+  - Resident income tax brackets (16%→15% cut in 2026-27)
+  - Medicare levy (2%) with low-income shade-in ($26k threshold)
+  - Medicare Levy Surcharge (3 tiers: $101k/1%, $118k/1.25%, $158k/1.5%)
+  - Low Income Tax Offset (LITO, max $700, two-stage phase-out)
+  - HELP/HECS marginal repayment system (new from 2025-26, threshold $67k)
+- [x] TaxInput + TaxResult Pydantic models
+- [x] **Unit tests at every bracket boundary — 77/77 passing**
+- [x] Wired as calculator_node in router_graph (conditional edge: calculation → calculator → END)
 
 **Deliverable:** Calculator passes all bracket boundary tests. *"I earned $95,000 — what's my tax?"* returns clean breakdown with sources.
 
