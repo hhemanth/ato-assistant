@@ -17,3 +17,11 @@ include = ["nodes*", "prompts*"]
 
 [tool.uv]
 package = true
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+
+[dependency-groups]
+dev = [
+    "pytest>=9.0.3",
+]
