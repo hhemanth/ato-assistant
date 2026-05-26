@@ -1,5 +1,4 @@
 const SUGGESTIONS = [
-  "What is the tax-free threshold for 2024–25?",
   "How do I claim work-from-home deductions?",
   "What is the Medicare levy?",
   "When is the tax return deadline?",
