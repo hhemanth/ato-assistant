@@ -188,8 +188,21 @@ async def crawl(client: httpx.AsyncClient) -> set[str]:
     return discovered
 
 
+def filter_leaves(urls: set[str]) -> set[str]:
+    """Remove hub pages: any URL that has at least one child in the same set."""
+    paths = {urlparse(u).path.rstrip("/") for u in urls}
+    return {
+        u for u in urls
+        if not any(
+            p != urlparse(u).path.rstrip("/") and p.startswith(urlparse(u).path.rstrip("/") + "/")
+            for p in paths
+        )
+    }
+
+
 def write_output(discovered: set[str], skip_set: set[str]) -> int:
     net_new = discovered - skip_set
+    net_new = filter_leaves(net_new)
 
     # Group by topic prefix for readability
     groups: dict[str, list[str]] = {}
