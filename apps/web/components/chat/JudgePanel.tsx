@@ -25,7 +25,7 @@ const LABELS: [keyof JudgeScores, string][] = [
 ];
 
 export default function JudgePanel({ scores }: JudgePanelProps) {
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(true);
 
   return (
     <div className="mt-3 ml-3 border border-gray-100 rounded-lg text-xs overflow-hidden">
@@ -54,7 +54,7 @@ export default function JudgePanel({ scores }: JudgePanelProps) {
               </div>
             );
           })}
-          <p className="text-[10px] text-gray-300 pt-1">Powered by Nemotron 4 340B</p>
+          <p className="text-[10px] text-gray-300 pt-1">Powered by Claude Haiku 4.5</p>
         </div>
       )}
     </div>

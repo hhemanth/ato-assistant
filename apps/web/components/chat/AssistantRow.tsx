@@ -79,11 +79,11 @@ export default function AssistantRow({
         {!isStreaming && scores && <JudgePanel scores={scores} />}
 
         {!isStreaming && text && (
-          <div className="mt-2 pl-3">
+          <div className="mt-3 pl-3">
             <button
               onClick={handleReport}
               disabled={reported}
-              className="text-xs text-gray-400 hover:text-red-500 disabled:text-gray-300 disabled:cursor-default transition-colors"
+              className="text-xs font-medium text-red-500 border border-red-200 rounded px-3 py-1 hover:bg-red-50 hover:border-red-400 disabled:text-gray-400 disabled:border-gray-200 disabled:bg-transparent disabled:cursor-default transition-colors"
             >
               {reported ? "✓ Reported" : "Report incorrect answer"}
             </button>
