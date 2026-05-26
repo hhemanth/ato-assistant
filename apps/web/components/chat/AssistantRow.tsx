@@ -31,12 +31,12 @@ export default function AssistantRow({
   }
 
   return (
-    <div className="bg-white border-b border-chat-border px-6 py-4 flex gap-3 items-start">
+    <div className="bg-white border-b border-chat-border px-4 md:px-6 py-4 flex gap-3 items-start">
       <span className="bg-navy text-gold text-[10px] font-semibold uppercase tracking-wide px-2 py-0.5 rounded flex-shrink-0 mt-0.5">
         ATO
       </span>
       <div className="flex-1 min-w-0">
-        <div className="border-l-4 border-navy pl-3">
+        <div className="border-l-4 border-navy pl-3 overflow-x-auto">
           <div className="text-sm text-gray-900 leading-relaxed prose prose-sm max-w-none
             prose-headings:font-semibold prose-headings:text-navy prose-headings:mt-4 prose-headings:mb-1
             prose-h2:text-base prose-h3:text-sm

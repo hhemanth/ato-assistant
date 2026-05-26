@@ -1,7 +1,9 @@
 """
-Fetch ATO pages listed in target_urls.txt and upsert into ato_pages.
+Fetch ATO pages and upsert into ato_pages.
 Run: uv run --directory packages/scraper python scrape.py
+     uv run --directory packages/scraper python scrape.py --urls-file discovered_urls.txt
 """
+import argparse
 import asyncio
 import os
 import re
@@ -99,17 +101,25 @@ async def scrape_url(
     print(f"  OK    {final_url} ({len(markdown)} chars)")
 
 
-def load_urls() -> list[str]:
+def load_urls(path: Path) -> list[str]:
     return [
         line.strip()
-        for line in URLS_FILE.read_text().splitlines()
+        for line in path.read_text().splitlines()
         if line.strip() and not line.startswith("#")
     ]
 
 
 async def main() -> None:
-    urls = load_urls()
-    print(f"Scraping {len(urls)} URLs at 1 req/sec ...\n")
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--urls-file",
+        default=str(URLS_FILE),
+        help="Path to a file with one URL per line (default: target_urls.txt)",
+    )
+    args = parser.parse_args()
+
+    urls = load_urls(Path(args.urls_file))
+    print(f"Scraping {len(urls)} URLs from {args.urls_file} at 1 req/sec ...\n")
 
     supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 

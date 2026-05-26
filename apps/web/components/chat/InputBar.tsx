@@ -30,13 +30,13 @@ export default function InputBar({
   }
 
   return (
-    <div className="bg-white border-t border-chat-border px-6 py-3 flex-shrink-0">
+    <div className="bg-white border-t border-chat-border px-4 md:px-6 pt-3 pb-safe flex-shrink-0">
       <form
         onSubmit={(e: FormEvent) => {
           e.preventDefault();
           if (!disabled && value.trim()) onSubmit();
         }}
-        className="flex gap-3 items-end"
+        className="flex gap-2 md:gap-3 items-end"
       >
         <textarea
           ref={textareaRef}
@@ -48,12 +48,12 @@ export default function InputBar({
           disabled={disabled}
           placeholder="Ask about Australian tax…"
           className="flex-1 resize-none overflow-hidden rounded-lg border border-chat-border px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-navy disabled:bg-gray-50 leading-relaxed"
-          style={{ minHeight: "40px", maxHeight: "96px" }}
+          style={{ minHeight: "44px", maxHeight: "96px" }}
         />
         <button
           type="submit"
           disabled={disabled || !value.trim()}
-          className="bg-navy text-white rounded-lg px-5 py-2 text-sm font-medium hover:bg-navy-mid disabled:opacity-40 disabled:cursor-not-allowed transition-colors flex-shrink-0"
+          className="bg-navy text-white rounded-lg px-4 md:px-5 text-sm font-medium hover:bg-navy-mid disabled:opacity-40 disabled:cursor-not-allowed transition-colors flex-shrink-0 min-h-[44px] min-w-[60px]"
         >
           Send
         </button>

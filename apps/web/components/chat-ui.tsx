@@ -96,7 +96,7 @@ export default function ChatUI() {
         <div className="md:hidden flex items-center gap-3 px-4 py-3 bg-navy border-b border-navy-mid flex-shrink-0">
           <button
             onClick={() => setSidebarOpen(true)}
-            className="text-white text-xl leading-none"
+            className="text-white text-xl w-11 h-11 flex items-center justify-center -ml-2 rounded"
             aria-label="Open menu"
           >
             ☰

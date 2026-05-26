@@ -10,7 +10,7 @@ interface EmptyStateProps {
 
 export default function EmptyState({ onSuggestionClick }: EmptyStateProps) {
   return (
-    <div className="flex flex-col items-center justify-center flex-1 px-6 py-16 text-center">
+    <div className="flex flex-col items-center justify-center flex-1 px-4 md:px-6 py-12 md:py-16 text-center">
       <h2 className="text-xl font-semibold text-navy mb-2">
         What would you like to know about Australian tax?
       </h2>
