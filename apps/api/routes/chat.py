@@ -21,6 +21,7 @@ from supabase import create_client, Client
 
 from graph import router_graph
 from judge_graph import judge_graph
+from nodes.verifier import verify_response
 
 router = APIRouter()
 limiter = Limiter(key_func=get_remote_address)
@@ -122,9 +123,7 @@ async def _retrieve(query: str) -> list[dict]:
 
 
 @traceable(name="rag_generate", metadata={"model": _MODEL})
-async def _rag_stream(messages: list[Message]) -> AsyncIterator[str]:
-    query = next((m.content for m in reversed(messages) if m.role == "user"), "")
-    chunks = await _retrieve(query)
+async def _rag_stream(messages: list[Message], chunks: list[dict]) -> AsyncIterator[str]:
     system = _SYSTEM_PROMPT.replace("{context}", _format_context(chunks))
     async with _anthropic.messages.stream(
         model=_MODEL,
@@ -169,9 +168,14 @@ async def _stream_response(messages: list[Message]) -> AsyncIterator[str]:
     )
     category: str = route_state["category"]
 
+    # Retrieve once for factual queries — reused by both RAG stream and verifier
+    chunks: list[dict] = []
+    if category == "factual":
+        chunks = await _retrieve(query)
+
     # Select stream source based on category
     if category == "factual":
-        source = _rag_stream(messages)
+        source = _rag_stream(messages, chunks)
     elif category == "personal_advice":
         source = _refusal_stream(query)
     elif category == "out_of_scope":
@@ -183,13 +187,13 @@ async def _stream_response(messages: list[Message]) -> AsyncIterator[str]:
             yield formatted
         source = _calc_stream()
 
-    # Stream to client, buffer for judge
+    # Stream to client, buffer for judge and verifier
     buffer: list[str] = []
     async for token in source:
         yield token
         buffer.append(token)
 
-    # Phase 2: judge (runs after stream completes)
+    # Phase 2: judge
     response_text = "".join(buffer)
     try:
         judge_state = await judge_graph.ainvoke(
@@ -207,6 +211,14 @@ async def _stream_response(messages: list[Message]) -> AsyncIterator[str]:
                 "check [ato.gov.au](https://ato.gov.au) directly."
             )
     yield f"\n__JUDGE__{json.dumps(scores)}__"
+
+    # Phase 3: verify (factual responses only)
+    if category == "factual" and chunks:
+        try:
+            summary = await verify_response(response_text, chunks)
+            yield f"\n__VERIFY__{summary.model_dump_json()}__"
+        except Exception:
+            pass
 
 
 @router.post("/chat")
