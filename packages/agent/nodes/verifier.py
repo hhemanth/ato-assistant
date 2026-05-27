@@ -43,9 +43,13 @@ def _extract_citations(response_text: str) -> dict[int, str]:
 
 
 def _extract_claim(response_text: str, citation_num: int) -> str:
-    """Extract the sentence containing [N] from the response body (before ## Sources)."""
+    """Extract the sentence containing [N] from the response body (before ## Sources).
+
+    Handles both inline citations ("rate is 2% [1].") and trailing citations ("rate is 2%. [1]").
+    """
     body = response_text.split("## Sources")[0]
-    pattern = rf"[^.!?\n]*\[{citation_num}\][^.!?\n]*[.!?]"
+    # Match sentence ending with [N] (trailing citation) or [N] inside sentence
+    pattern = rf"[^.!?\n]*(?:\[{citation_num}\][^.!?\n]*[.!?]|[^.!?\n]*[.!?]\s*\[{citation_num}\])"
     m = re.search(pattern, body)
     return m.group(0).strip() if m else ""
 

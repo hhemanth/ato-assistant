@@ -18,14 +18,16 @@ interface AssistantRowProps {
 }
 
 const JUDGE_RE = /\n?__JUDGE__(\{.*?\})__/;
+const VERIFY_RE = /\n?__VERIFY__\{.*?\}__/;
 
 function parseContent(raw: string): { text: string; scores: JudgeScores | null } {
-  const match = raw.match(JUDGE_RE);
-  if (!match) return { text: raw, scores: null };
+  const stripped = raw.replace(VERIFY_RE, "");
+  const match = stripped.match(JUDGE_RE);
+  if (!match) return { text: stripped, scores: null };
   try {
-    return { text: raw.replace(JUDGE_RE, "").trimEnd(), scores: JSON.parse(match[1]) };
+    return { text: stripped.replace(JUDGE_RE, "").trimEnd(), scores: JSON.parse(match[1]) };
   } catch {
-    return { text: raw.replace(JUDGE_RE, "").trimEnd(), scores: null };
+    return { text: stripped.replace(JUDGE_RE, "").trimEnd(), scores: null };
   }
 }
 
