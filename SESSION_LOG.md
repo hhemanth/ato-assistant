@@ -95,3 +95,26 @@
 ### What's next
 - Day 13: Refusal prompts polish + edge case testing (adversarial prompts, jailbreaks)
 - Day 14: Citation verifier scaffold
+
+---
+
+## 2026-05-27 — Slice 3, Days 13-14
+
+**Slice:** 3
+
+### What got done
+- `apps/api/prompts/refusal.md`: added roleplay/hypothetical framing guard
+- `apps/api/prompts/out_of_scope.md`: added state-tax redirect (stamp duty, land tax → state revenue offices)
+- `packages/agent/tests/test_adversarial.py`: 15 adversarial router tests (12 pass, 3 xfail); xfails seed Week 3 eval golden dataset
+  - xfail: `test_jailbreak_developer_mode` (router returns out_of_scope instead of personal_advice)
+  - xfail: `test_state_tax_stamp_duty` (router returns factual instead of out_of_scope)
+  - xfail: `test_state_tax_land_tax` (router returns factual instead of out_of_scope)
+- `packages/agent/nodes/verifier.py`: citation verifier — `_extract_citations`, `_match_chunk`, `_check_snippet` (Haiku 4.5), `verify_response`; em-dash separator regex widened to `[—–-]`; claim extraction bounded to response body only
+- `packages/agent/prompts/verifier.md`: Haiku snippet verification prompt
+- `packages/agent/tests/test_verifier.py`: 13 unit/mock tests — all passing
+- `apps/api/routes/chat.py`: chunks threaded from `_retrieve` into `_rag_stream(messages, chunks)`; emits `__VERIFY__{json}__` sentinel after `__JUDGE__` for factual responses
+
+### What's next
+- Week 3, Day 15: Citation verifier hardening — `ClaimVerification` Pydantic model, strip/retry logic, UI badge "✓ N/N claims verified"
+- Week 3, Day 16: Langfuse dashboard for verification pass rate, refusal rate, claims-per-response, latency
+- Router prompt hardening for the 3 xfail cases (state taxes + developer-mode jailbreak)

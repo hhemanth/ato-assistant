@@ -82,9 +82,9 @@
 
 ### Sat (Day 13) — Refusal prompts + Article #2 (4 hrs)
 
-- [ ] `prompts/refusal.md`: structured refusal that always (a) explains *why* it can't answer personally, (b) gives the relevant factual rule from ATO docs, (c) directs to a registered tax agent
-- [ ] `prompts/out_of_scope.md`: polite redirect that mentions what the assistant DOES cover
-- [ ] Test edge cases: adversarial prompts, leading questions, jailbreaks (note failures for week 3 eval dataset)
+- [x] `prompts/refusal.md`: structured refusal that always (a) explains *why* it can't answer personally, (b) gives the relevant factual rule from ATO docs, (c) directs to a registered tax agent
+- [x] `prompts/out_of_scope.md`: polite redirect that mentions what the assistant DOES cover
+- [x] Test edge cases: adversarial prompts, leading questions, jailbreaks (note failures for week 3 eval dataset)
 
 **Article #2 (Saturday 7am Sydney):** *"Day 10 update: I added grounding and citations to my chat app. Here's what changed."*
 - ~1000 words
@@ -97,12 +97,12 @@
 
 This kicks off the bigger citation verification work that completes Mon/Tue of Week 3.
 
-- [ ] `packages/agent/nodes/verifier.py`: scaffold the verifier node
-- [ ] For each `[N]` marker in the answer:
+- [x] `packages/agent/nodes/verifier.py`: scaffold the verifier node
+- [x] For each `[N]` marker in the answer:
   1. URL check — does it exist in `ato_pages`?
   2. Snippet check — does the cited chunk text support the claim? (Haiku 4.5 call, structured output)
-- [ ] Add `verification_summary` field to response
-- [ ] First version is OK to be rough — week 3 polishes it and ties it to eval metrics
+- [x] Add `verification_summary` field to response
+- [x] First version is OK to be rough — week 3 polishes it and ties it to eval metrics
 
 **Deliverable:** Verifier scaffold in place, runs on every response. Failure logging to Langfuse working.
 
