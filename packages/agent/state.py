@@ -10,3 +10,4 @@ class AgentState(TypedDict, total=False):
     response: str              # full buffered response text, set before judge runs
     judge_scores: dict         # {"helpfulness": float, "correctness": float, "coherence": float}
     calculator_result: dict   # populated by calculator_node for "calculation" queries
+    verification_summary: dict
