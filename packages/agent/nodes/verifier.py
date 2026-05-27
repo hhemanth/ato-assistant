@@ -36,16 +36,17 @@ def _extract_citations(response_text: str) -> dict[int, str]:
     if not match:
         return citations
     for line in match.group(1).splitlines():
-        m = re.match(r"\[(\d+)\]\s+.*?—\s+(https?://[^\s]+)", line)
+        m = re.match(r"\[(\d+)\]\s+.*?[—–-]\s+(https?://[^\s]+)", line)
         if m:
             citations[int(m.group(1))] = m.group(2).rstrip(".,;)")
     return citations
 
 
 def _extract_claim(response_text: str, citation_num: int) -> str:
-    """Extract the sentence containing [N]."""
+    """Extract the sentence containing [N] from the response body (before ## Sources)."""
+    body = response_text.split("## Sources")[0]
     pattern = rf"[^.!?\n]*\[{citation_num}\][^.!?\n]*[.!?]"
-    m = re.search(pattern, response_text)
+    m = re.search(pattern, body)
     return m.group(0).strip() if m else ""
 
 
